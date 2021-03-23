@@ -1,5 +1,8 @@
 import React from 'react';
 import BackgroundImage from 'gatsby-background-image';
+import { getImage } from 'gatsby-plugin-image';
+import { convertToBgImage } from 'gbimage-bridge';
+
 import { graphql } from 'gatsby';
 import styled from 'styled-components';
 import Layout from '../components/layout';
@@ -26,19 +29,24 @@ const ContentBox = styled.div`
   text-align: center;
 `;
 
-const IndexPage = props => (
-  <Layout>
-    <SEO title="Home" />
-    <StyledBackground fluid={props.data.indexImage.childImageSharp.fluid}>
-      <BlackOverlay>
-        <ContentBox>
-          <h1>London</h1>
-          <h2>27 Apr, 2004</h2>
-        </ContentBox>
-      </BlackOverlay>
-    </StyledBackground>
-  </Layout>
-);
+const IndexPage = props => {
+  const image = getImage(props.data.indexImage);
+  const bgImage = convertToBgImage(image);
+
+  return (
+    <Layout>
+      <SEO title="Home" />
+      <StyledBackground {...bgImage}>
+        <BlackOverlay>
+          <ContentBox>
+            <h1>London</h1>
+            <h2>27 Apr, 2004</h2>
+          </ContentBox>
+        </BlackOverlay>
+      </StyledBackground>
+    </Layout>
+  );
+};
 
 export default IndexPage;
 
@@ -46,9 +54,11 @@ export const pageQuery = graphql`
   query {
     indexImage: file(relativePath: { eq: "london.jpg" }) {
       childImageSharp {
-        fluid(maxWidth: 2560) {
-          ...GatsbyImageSharpFluid
-        }
+        gatsbyImageData(
+          width: 2560
+          placeholder: BLURRED
+          formats: [AUTO, WEBP, AVIF]
+        )
       }
     }
   }
